@@ -38,7 +38,7 @@
                             <textarea class="form-control message-area" id="messageText" rows="3" onchange="checkImagesInTextArea()"></textarea>
                         </div>
                         <div id="text-href-block">
-                            <img id="text-href-image" src="./img/telegram.png">
+                            <img id="text-href-image" src="">
                         </div>
                         <div class="content-body-item-body-actions">
                             <button type="button" class="btn btn-primary btn-lg"
@@ -59,6 +59,8 @@
 
         function onClear() {
             document.getElementById('content-body-item-result-block').style.setProperty('display', 'none');
+            document.getElementById('text-href-image').src = '';
+            document.getElementById('text-href-block').style.setProperty('display', 'none');
         }
 
         function checkImagesInTextArea() {
@@ -105,12 +107,14 @@
             document.getElementById('content-body-item-result-text').innerHTML = 'Сообщение успешно отправлено.';
             document.getElementById('content-body-item-result-text').style.setProperty('color', 'green');
             messageNode.value = '';
+            document.getElementById('text-href-image').src = '';
+            document.getElementById('text-href-block').style.setProperty('display', 'none');
         }
 
         function send(id, text, imageHref) {
             let url = "https://api.telegram.org/bot6234049622:AAEQ1JqgeIlvCzAItBvZ65F5iLB0h2ZCLMU/sendPhoto?chat_id=" + id + "&photo=" + imageHref + "&caption=" + text;
 
-            if (imageHref == null || imageHref == undefined)
+            if (imageHref == null || imageHref == undefined || !imageHref.startsWith('http'))
                 url = "https://api.telegram.org/bot6234049622:AAEQ1JqgeIlvCzAItBvZ65F5iLB0h2ZCLMU/sendMessage?chat_id=" + id + "&text=" + text;
 
             let request = new XMLHttpRequest();

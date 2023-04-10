@@ -57,3 +57,13 @@
 .message-area {
     max-height: 250px;
 }
+
+#text-href-block {
+    display: none;
+    width: 100%;
+    justify-content: center;
+}
+
+#text-href-image {
+    max-width: 200px;
+}

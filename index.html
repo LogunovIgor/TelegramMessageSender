@@ -35,7 +35,10 @@
                         </div>
                         <div class="mb-3">
                             <label for="messageText" class="form-label">Текст сообщения:</label>
-                            <textarea class="form-control message-area" id="messageText" rows="3"></textarea>
+                            <textarea class="form-control message-area" id="messageText" rows="3" onchange="checkImagesInTextArea()"></textarea>
+                        </div>
+                        <div id="text-href-block">
+                            <img id="text-href-image" src="./img/telegram.png">
                         </div>
                         <div class="content-body-item-body-actions">
                             <button type="button" class="btn btn-primary btn-lg"
@@ -56,6 +59,23 @@
 
         function onClear() {
             document.getElementById('content-body-item-result-block').style.setProperty('display', 'none');
+        }
+
+        function checkImagesInTextArea() {
+            let messageRows = document.getElementById('messageText').value.split(' ');
+            const pattern = /^(https?):\/\/[^\s$.?#].[^\s]*(?:jpg|jpeg|png)$/;
+            
+            let imageHref;
+            for(let i = 0; i < messageRows.length; i++) {
+                if (pattern.test(messageRows[i])) {
+                    imageHref = messageRows[i];
+                    document.getElementById('text-href-block').style.setProperty('display', 'flex');
+                    document.getElementById('text-href-image').src = imageHref;
+                    document.getElementById('messageText').value = document.getElementById('messageText').value.replace(imageHref, '');
+
+                    break;
+                }
+            }
         }
 
         function sendMessage() {
@@ -79,15 +99,20 @@
                 return;
             }
 
-            send(selectNodeUserId, message);
+            let imageHref = document.getElementById('text-href-image').src;
+            send(selectNodeUserId, message, imageHref);
             document.getElementById('content-body-item-result-block').style.setProperty('display', 'block');
             document.getElementById('content-body-item-result-text').innerHTML = 'Сообщение успешно отправлено.';
             document.getElementById('content-body-item-result-text').style.setProperty('color', 'green');
             messageNode.value = '';
         }
 
-        function send(id, text) {
-            let url = "https://api.telegram.org/bot6234049622:AAEQ1JqgeIlvCzAItBvZ65F5iLB0h2ZCLMU/sendMessage?chat_id=" + id + "&text=" + text;
+        function send(id, text, imageHref) {
+            let url = "https://api.telegram.org/bot6234049622:AAEQ1JqgeIlvCzAItBvZ65F5iLB0h2ZCLMU/sendPhoto?chat_id=" + id + "&photo=" + imageHref + "&caption=" + text;
+
+            if (imageHref == null || imageHref == undefined)
+                url = "https://api.telegram.org/bot6234049622:AAEQ1JqgeIlvCzAItBvZ65F5iLB0h2ZCLMU/sendMessage?chat_id=" + id + "&text=" + text;
+
             let request = new XMLHttpRequest();
             request.open('GET', url, true);
             request.send();

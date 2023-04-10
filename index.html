@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="css/style.css" type="text/css" rel="stylesheet">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="content">
+        <article class="content-body">
+            <section class="content-body-item">
+                <div class="content-body-item-header">
+                    <img class="content-body-item-header-img" src="./img/telegram.png">
+                </div>
+                <div class="content-body-item-body">
+                    <form>
+                        <div>
+                            <select id="users" class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" onselect="">
+                                <option selected>Select telegram user</option>
+                            </select>
+                        </div>
+                        <div class="input-group mb-2">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">&nbsp;</div>
+                            </div>
+                            <input type="text" class="form-control" placeholder="Username"
+                                aria-describedby="inputGroupPrepend3" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label for="exampleFormControlTextarea1" class="form-label">Текст сообщения:</label>
+                            <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                        </div>
+                        <div class="content-body-item-body-actions">
+                            <button type="button" class="btn btn-primary btn-lg">Отправить</button>
+                            <button type="reset" class="btn btn-secondary btn-lg">Очистить</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </article>
+    </div>
+
+
+
+    <!-- 
+
+    <div>
+        <select id="users" class="form-select" multiple aria-label="multiple select">
+          </select>
+    </div>
+    <div class="form-group">
+        <label for="exampleFormControlTextarea1">Example textarea</label>
+        <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+      </div> -->
+
+    <script>
+        let ids = [388042434, 223054377, 232729325, 5062901177, 5677540667, 6081746371, 596300784];
+        let usersContent = getSelectUsersContent();
+
+        document.getElementById('users').innerHTML = document.getElementById('users').innerHTML + usersContent;
+
+        // for (i = 0; i< a.length; i++) {
+        //     sendMessage(a[i], 'Хай, Кристина, крутая она, хав а ю ?');
+        // }
+
+        // function sendMessage(id, text) {
+        //     let url = "https://api.telegram.org/bot6234049622:AAEQ1JqgeIlvCzAItBvZ65F5iLB0h2ZCLMU/sendMessage?chat_id=" + id + "&text=" + text;
+        //     let request = new XMLHttpRequest();
+        //     request.open('GET', url, true);
+        //     request.send();
+        // }
+
+        function getSelectUsersContent() {
+            let result;
+
+            for (let i = 0; i < ids.length; i++) {
+                let userJsonData = getChatMemberData(ids[i]);
+                if (!userJsonData.ok)
+                    continue;
+
+                let username = getChatMemberUserName(userJsonData);
+                result += `<option value="${ids[i]}">${username}</options>`;
+            }
+
+            return result;
+        }
+
+        function getChatMemberUserName(jsonData) {
+            let firstName = jsonData.result.user.first_name;
+            let lastName = jsonData.result.user.last_name;
+            let username = jsonData.result.user.username;
+
+            let result = `${firstName ?? ''} ${lastName ?? ''}`;
+
+            if (!isEmpty(username))
+                result = result.trimEnd() + `(@${username})`;
+
+            return result.trim();
+
+        }
+
+        function isEmpty(value) {
+            return (value == null || (typeof value === "string" && value.trim().length === 0));
+        }
+
+        function getChatMemberData(id) {
+            let request = new XMLHttpRequest();
+            let url = "https://api.telegram.org/bot6234049622:AAEQ1JqgeIlvCzAItBvZ65F5iLB0h2ZCLMU/getChatMember?chat_id=" + id + "&user_id=" + id;
+
+            request.open('GET', url, false);
+            request.send();
+
+            return JSON.parse(request.responseText);
+        }
+    </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

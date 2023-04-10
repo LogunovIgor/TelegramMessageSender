@@ -10,10 +10,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-flow: column nowrap;
 }
 
 .content-body-item {
     max-width: 650px;
+    min-width: 450px;
     border-radius: 25px;
     border: 1px solid black;
     padding: 25px;
@@ -40,4 +42,18 @@
 .content-body-item-body-actions {
     display: flex;
     justify-content: space-between;
+}
+
+#content-body-item-result-block {
+    margin: 10px;
+    display: none;
+}
+
+#content-body-item-result-text {
+    font-size: 14px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.message-area {
+    max-height: 250px;
 }

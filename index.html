@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link href="css/style.css" type="text/css" rel="stylesheet">
-    <title>Document</title>
+    <title>Отправитель сообщений в Telegram</title>
 </head>
 
 <body>
@@ -21,105 +21,134 @@
                 <div class="content-body-item-body">
                     <form>
                         <div>
-                            <select id="users" class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" onselect="">
-                                <option selected>Select telegram user</option>
+                            <select id="users" class="form-select form-select-lg mb-3"
+                                aria-label=".form-select-lg example" onchange="updateUsernameInfo()">
+                                <option selected disabled value="0">Select telegram user</option>
                             </select>
                         </div>
                         <div class="input-group mb-2">
                             <div class="input-group-prepend">
-                                <div class="input-group-text">&nbsp;</div>
+                                <div id="userInfoType" class="input-group-text">&nbsp;</div>
                             </div>
-                            <input type="text" class="form-control" placeholder="Username"
+                            <input id="userInfoValue" type="text" class="form-control"
                                 aria-describedby="inputGroupPrepend3" disabled>
                         </div>
                         <div class="mb-3">
-                            <label for="exampleFormControlTextarea1" class="form-label">Текст сообщения:</label>
-                            <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                            <label for="messageText" class="form-label">Текст сообщения:</label>
+                            <textarea class="form-control message-area" id="messageText" rows="3"></textarea>
                         </div>
                         <div class="content-body-item-body-actions">
-                            <button type="button" class="btn btn-primary btn-lg">Отправить</button>
-                            <button type="reset" class="btn btn-secondary btn-lg">Очистить</button>
+                            <button type="button" class="btn btn-primary btn-lg"
+                                onclick="sendMessage()">Отправить</button>
+                            <button type="reset" class="btn btn-secondary btn-lg" onclick="onClear()">Очистить</button>
                         </div>
                     </form>
                 </div>
             </section>
+            <div id="content-body-item-result-block">
+                <span id="content-body-item-result-text">RESULT</span>
+            </div>
         </article>
     </div>
-
-
-
-    <!-- 
-
-    <div>
-        <select id="users" class="form-select" multiple aria-label="multiple select">
-          </select>
-    </div>
-    <div class="form-group">
-        <label for="exampleFormControlTextarea1">Example textarea</label>
-        <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
-      </div> -->
-
     <script>
-        let ids = [388042434, 223054377, 232729325, 5062901177, 5677540667, 6081746371, 596300784];
-        let usersContent = getSelectUsersContent();
+        let userList = getUsersData();
+        initializeUsersSelector(userList);
 
-        document.getElementById('users').innerHTML = document.getElementById('users').innerHTML + usersContent;
+        function onClear() {
+            document.getElementById('content-body-item-result-block').style.setProperty('display', 'none');
+        }
 
-        // for (i = 0; i< a.length; i++) {
-        //     sendMessage(a[i], 'Хай, Кристина, крутая она, хав а ю ?');
-        // }
+        function sendMessage() {
+            let selectNode = document.getElementById('users');
+            let selectNodeUserId = selectNode.value;
 
-        // function sendMessage(id, text) {
-        //     let url = "https://api.telegram.org/bot6234049622:AAEQ1JqgeIlvCzAItBvZ65F5iLB0h2ZCLMU/sendMessage?chat_id=" + id + "&text=" + text;
-        //     let request = new XMLHttpRequest();
-        //     request.open('GET', url, true);
-        //     request.send();
-        // }
-
-        function getSelectUsersContent() {
-            let result;
-
-            for (let i = 0; i < ids.length; i++) {
-                let userJsonData = getChatMemberData(ids[i]);
-                if (!userJsonData.ok)
-                    continue;
-
-                let username = getChatMemberUserName(userJsonData);
-                result += `<option value="${ids[i]}">${username}</options>`;
+            if (selectNodeUserId == 0) {
+                document.getElementById('content-body-item-result-block').style.setProperty('display', 'block');
+                document.getElementById('content-body-item-result-text').innerHTML = 'Необходимо выбрать пользователя.';
+                document.getElementById('content-body-item-result-text').style.setProperty('color', 'red');
+                return;
             }
 
-            return result;
+            let messageNode = document.getElementById('messageText');
+            let message = messageNode.value;
+
+            if (message == null || message.length == 0) {
+                document.getElementById('content-body-item-result-block').style.setProperty('display', 'block');
+                document.getElementById('content-body-item-result-text').innerHTML = 'Введите сообщение для отправки.';
+                document.getElementById('content-body-item-result-text').style.setProperty('color', 'red');
+                return;
+            }
+
+            send(selectNodeUserId, message);
+            document.getElementById('content-body-item-result-block').style.setProperty('display', 'block');
+            document.getElementById('content-body-item-result-text').innerHTML = 'Сообщение успешно отправлено.';
+            document.getElementById('content-body-item-result-text').style.setProperty('color', 'green');
+            messageNode.value = '';
         }
 
-        function getChatMemberUserName(jsonData) {
-            let firstName = jsonData.result.user.first_name;
-            let lastName = jsonData.result.user.last_name;
-            let username = jsonData.result.user.username;
-
-            let result = `${firstName ?? ''} ${lastName ?? ''}`;
-
-            if (!isEmpty(username))
-                result = result.trimEnd() + `(@${username})`;
-
-            return result.trim();
-
-        }
-
-        function isEmpty(value) {
-            return (value == null || (typeof value === "string" && value.trim().length === 0));
-        }
-
-        function getChatMemberData(id) {
+        function send(id, text) {
+            let url = "https://api.telegram.org/bot6234049622:AAEQ1JqgeIlvCzAItBvZ65F5iLB0h2ZCLMU/sendMessage?chat_id=" + id + "&text=" + text;
             let request = new XMLHttpRequest();
-            let url = "https://api.telegram.org/bot6234049622:AAEQ1JqgeIlvCzAItBvZ65F5iLB0h2ZCLMU/getChatMember?chat_id=" + id + "&user_id=" + id;
-
-            request.open('GET', url, false);
+            request.open('GET', url, true);
             request.send();
-
-            return JSON.parse(request.responseText);
         }
+
+        function updateUsernameInfo() {
+            let selectNode = document.getElementById('users');
+            let selectNodeUserId = selectNode.value;
+
+            if (selectNodeUserId == null || selectNodeUserId == undefined)
+                return;
+
+            var currentUser = userList.find(usr => usr.id == selectNodeUserId);
+
+            if (currentUser == null || currentUser == undefined || currentUser.username == null || currentUser.username == undefined) {
+                document.getElementById('userInfoType').innerHTML = 'ID';
+                document.getElementById('userInfoValue').value = selectNodeUserId;
+                return;
+            }
+
+            document.getElementById('userInfoType').innerHTML = '@';
+            document.getElementById('userInfoValue').value = currentUser.username + ` (${currentUser.id})`;
+        }
+
+        function getUsersData() {
+            let ids = [388042434, 223054377, 232729325, 5062901177, 5677540667, 6081746371, 596300784];
+            let users = [];
+
+            for (let i = 0; i < ids.length; i++) {
+                let request = new XMLHttpRequest();
+                let url = "https://api.telegram.org/bot6234049622:AAEQ1JqgeIlvCzAItBvZ65F5iLB0h2ZCLMU/getChatMember?chat_id=" + ids[i] + "&user_id=" + ids[i];
+
+                request.open('GET', url, false);
+                request.send();
+
+                var data = JSON.parse(request.responseText);
+
+                if (data != null && data.ok) {
+                    let user = {
+                        id: ids[i],
+                        firstName: data.result.user.first_name,
+                        lastName: data.result.user.last_name,
+                        username: data.result.user.username
+                    }
+
+                    users.push(user);
+                }
+            }
+
+            return users;
+        }
+
+        function initializeUsersSelector(usrs) {
+            for (let i = 0; i < usrs.length; i++) {
+                let userName = (usrs[i].firstName ?? '') + ' ' + (usrs[i].lastName ?? '');
+                document.getElementById('users').innerHTML += `<option value="${usrs[i].id}">${userName.trim()}</options>`;
+            }
+        }
+
     </script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
 </body>

@@ -22,20 +22,25 @@
                     <form>
                         <div>
                             <select id="users" class="form-select form-select-lg mb-3"
-                                aria-label=".form-select-lg example" onchange="updateUsernameInfo()">
+                                aria-label=".form-select-lg example" onchange="updateUsernameInfo()" multiple>
                                 <option selected disabled value="0">Select telegram user</option>
                             </select>
                         </div>
-                        <div class="input-group mb-2">
-                            <div class="input-group-prepend">
-                                <div id="userInfoType" class="input-group-text">&nbsp;</div>
+                        <div id="userInfo">
+                            <div class='input-group-prepend'>
+                                <div id='userInfoType' class='input-group-text'>
+                                    <span>@</span>
+                                </div>
+                                <div id='userInfoValue'>
+                                    <input type='text' class='form-control' aria-describedby='inputGroupPrepend3'
+                                        disabled value="test">
+                                </div>
                             </div>
-                            <input id="userInfoValue" type="text" class="form-control"
-                                aria-describedby="inputGroupPrepend3" disabled>
                         </div>
                         <div class="mb-3">
                             <label for="messageText" class="form-label">Текст сообщения:</label>
-                            <textarea class="form-control message-area" id="messageText" rows="3" onchange="checkImagesInTextArea()"></textarea>
+                            <textarea class="form-control message-area" id="messageText" rows="3"
+                                onchange="checkImagesInTextArea()"></textarea>
                         </div>
                         <div id="text-href-block">
                             <img id="text-href-image" src="">
@@ -61,14 +66,15 @@
             document.getElementById('content-body-item-result-block').style.setProperty('display', 'none');
             document.getElementById('text-href-image').src = '';
             document.getElementById('text-href-block').style.setProperty('display', 'none');
+            document.getElementById('userInfo').innerHTML = '';
         }
 
         function checkImagesInTextArea() {
             let messageRows = document.getElementById('messageText').value.split(' ');
             const pattern = /^(https?):\/\/[^\s$.?#].[^\s]*(?:jpg|jpeg|png)$/;
-            
+
             let imageHref;
-            for(let i = 0; i < messageRows.length; i++) {
+            for (let i = 0; i < messageRows.length; i++) {
                 if (pattern.test(messageRows[i])) {
                     imageHref = messageRows[i];
                     document.getElementById('text-href-block').style.setProperty('display', 'flex');
@@ -82,11 +88,16 @@
 
         function sendMessage() {
             let selectNode = document.getElementById('users');
-            let selectNodeUserId = selectNode.value;
+            let selectedUsers = [];
 
-            if (selectNodeUserId == 0) {
+            for (let i = 0; i < selectNode.options.length; i++) {
+                if (selectNode.options[i].selected)
+                    selectedUsers.push(selectNode.options[i].value);
+            }
+
+            if (selectedUsers.length == 0) {
                 document.getElementById('content-body-item-result-block').style.setProperty('display', 'block');
-                document.getElementById('content-body-item-result-text').innerHTML = 'Необходимо выбрать пользователя.';
+                document.getElementById('content-body-item-result-text').innerHTML = 'Необходимо выбрать пользователя(ей).';
                 document.getElementById('content-body-item-result-text').style.setProperty('color', 'red');
                 return;
             }
@@ -102,9 +113,12 @@
             }
 
             let imageHref = document.getElementById('text-href-image').src;
-            send(selectNodeUserId, message, imageHref);
+            for (let index = 0; index < selectedUsers.length; index++) {
+                send(selectedUsers[index], message, imageHref);
+            }
+
             document.getElementById('content-body-item-result-block').style.setProperty('display', 'block');
-            document.getElementById('content-body-item-result-text').innerHTML = 'Сообщение успешно отправлено.';
+            document.getElementById('content-body-item-result-text').innerHTML = `Сообщение \'${message}\' успешно отправлено ${selectedUsers.length} пользователям.`;
             document.getElementById('content-body-item-result-text').style.setProperty('color', 'green');
             messageNode.value = '';
             document.getElementById('text-href-image').src = '';
@@ -123,22 +137,29 @@
         }
 
         function updateUsernameInfo() {
+            document.getElementById('userInfo').innerHTML = '';
             let selectNode = document.getElementById('users');
-            let selectNodeUserId = selectNode.value;
+            let selectedUsers = [];
 
-            if (selectNodeUserId == null || selectNodeUserId == undefined)
-                return;
-
-            var currentUser = userList.find(usr => usr.id == selectNodeUserId);
-
-            if (currentUser == null || currentUser == undefined || currentUser.username == null || currentUser.username == undefined) {
-                document.getElementById('userInfoType').innerHTML = 'ID';
-                document.getElementById('userInfoValue').value = selectNodeUserId;
-                return;
+            for (let i = 0; i < selectNode.options.length; i++) {
+                if (selectNode.options[i].selected)
+                    selectedUsers.push(selectNode.options[i].value);
             }
 
-            document.getElementById('userInfoType').innerHTML = '@';
-            document.getElementById('userInfoValue').value = currentUser.username + ` (${currentUser.id})`;
+            if (selectedUsers.length == 0)
+                return;
+
+            for (let i = 0; i < selectedUsers.length; i++) {
+                var currentUser = userList.find(usr => usr.id == selectedUsers[i]);
+
+                if (currentUser == null || currentUser == undefined || currentUser.username == null || currentUser.username == undefined) {
+                    document.getElementById('userInfo').innerHTML += "<div class='input-group-prepend'><div id='userInfoType' class='input-group-text'><span>ID</span></div><div id='userInfoValue'><input type='text' class='form-control' aria-describedby='inputGroupPrepend3' disabled value=\"" + currentUser.id + "\"></div></div>";
+                    continue;
+                }
+
+                let currentHtml = document.getElementById('userInfo').innerHTML;
+                document.getElementById('userInfo').innerHTML += "<div class='input-group-prepend'><div id='userInfoType' class='input-group-text'><span>@</span></div><div id='userInfoValue'><input type='text' class='form-control' aria-describedby='inputGroupPrepend3' disabled value=\"" + currentUser.username + ` (${currentUser.id})` + "\"></div></div>";
+            }
         }
 
         function getUsersData() {

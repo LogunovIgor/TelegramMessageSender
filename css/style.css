@@ -58,6 +58,7 @@
     max-height: 250px;
 }
 
+
 #text-href-block {
     display: none;
     width: 100%;
@@ -67,4 +68,12 @@
 
 #text-href-image {
     max-width: 200px;
+}
+
+#userInfoType {
+    display: inline-block;
+}
+
+#userInfoValue {
+    display: inline-block;
 }

@@ -28,13 +28,13 @@
                         </div>
                         <div id="userInfo">
                             <div class='input-group-prepend'>
-                                <div id='userInfoType' class='input-group-text'>
+                                <!-- <div id='userInfoType' class='input-group-text'>
                                     <span>@</span>
                                 </div>
                                 <div id='userInfoValue'>
                                     <input type='text' class='form-control' aria-describedby='inputGroupPrepend3'
                                         disabled value="test">
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                         <div class="mb-3">
@@ -142,7 +142,7 @@
             let selectedUsers = [];
 
             for (let i = 0; i < selectNode.options.length; i++) {
-                if (selectNode.options[i].selected)
+                if (selectNode.options[i].selected && !selectNode.options[i].disabled)
                     selectedUsers.push(selectNode.options[i].value);
             }
 

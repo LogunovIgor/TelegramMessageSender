@@ -104,15 +104,15 @@
 
             let messageNode = document.getElementById('messageText');
             let message = messageNode.value;
+            let imageHref = document.getElementById('text-href-image').src;
 
-            if (message == null || message.length == 0) {
+            if ((message == null || message.length == 0) && (imageHref == null || imageHref == undefined || !imageHref.startsWith('http'))) {
                 document.getElementById('content-body-item-result-block').style.setProperty('display', 'block');
                 document.getElementById('content-body-item-result-text').innerHTML = 'Введите сообщение для отправки.';
                 document.getElementById('content-body-item-result-text').style.setProperty('color', 'red');
                 return;
             }
 
-            let imageHref = document.getElementById('text-href-image').src;
             for (let index = 0; index < selectedUsers.length; index++) {
                 send(selectedUsers[index], message, imageHref);
             }

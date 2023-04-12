@@ -40,7 +40,7 @@
                         <div class="mb-3">
                             <label for="messageText" class="form-label">Текст сообщения:</label>
                             <textarea class="form-control message-area" id="messageText" rows="3"
-                                onchange="checkImagesInTextArea()"></textarea>
+                                onchange="checkImagesInTextArea()" oninput="resizeTextArea()"></textarea>
                         </div>
                         <div id="text-href-block">
                             <img id="text-href-image" src="">
@@ -195,6 +195,21 @@
                 let userName = (usrs[i].firstName ?? '') + ' ' + (usrs[i].lastName ?? '');
                 document.getElementById('users').innerHTML += `<option value="${usrs[i].id}">${userName.trim()}</options>`;
             }
+        }
+
+        function resizeTextArea() {
+            document.getElementById('messageText').style.height = 'auto';
+            let height = (document.getElementById('messageText').scrollHeight);
+
+            if (height < 350)
+            {
+                document.getElementById('messageText').style.height = (document.getElementById('messageText').scrollHeight) + 'px';
+                document.getElementById('messageText').style.overflow = 'hidden';
+                return;
+            }
+
+            document.getElementById('messageText').style.height = 350 + 'px';
+            document.getElementById('messageText').style.overflow = 'auto';
         }
 
     </script>
